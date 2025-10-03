@@ -3,6 +3,8 @@ services:
     build: .
     environment:
       - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
     volumes:
       - .:/app
     ports:

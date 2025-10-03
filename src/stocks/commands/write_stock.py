@@ -70,6 +70,8 @@ def update_stock_redis(order_items, operation):
     if not order_items:
         return
     r = get_redis_conn()
+    session = get_sqlalchemy_session()
+    
     stock_keys = list(r.scan_iter("stock:*"))
     if stock_keys:
         pipeline = r.pipeline()
@@ -88,8 +90,19 @@ def update_stock_redis(order_items, operation):
                 new_quantity = current_stock + quantity
             else:  
                 new_quantity = current_stock - quantity
+                
+            product_info = _get_product_info(product_id, session)
             
-            pipeline.hset(f"stock:{product_id}", "quantity", new_quantity)
+            mapping = {
+                "quantity": new_quantity
+            }
+            if product_info:
+                if product_info.get("name"): mapping["name"] = product_info["name"]
+                if product_info.get("sku"): mapping["sku"] = product_info["sku"]
+                if product_info.get("price"): mapping["price"] = float(product_info["price"])
+
+            pipeline.hset(f"stock:{product_id}", mapping=mapping)
+            
         
         pipeline.execute()
     
@@ -111,10 +124,22 @@ def _populate_redis_from_mysql(redis_conn):
         pipeline = redis_conn.pipeline()
         
         for product_id, quantity in stocks:
-            pipeline.hset(
-                f"stock:{product_id}", 
-                mapping={ "quantity": quantity }
-            )
+            
+            product_info = _get_product_info(product_id, session)
+            
+            mapping = {
+                "quantity": quantity
+            }
+            if product_info:
+                if product_info.get("name"): mapping["name"] = product_info["name"]
+                if product_info.get("sku"): mapping["sku"] = product_info["sku"]
+                if product_info.get("price"): mapping["price"] = float(product_info["price"])
+
+            pipeline.hset(f"stock:{product_id}", mapping=mapping)
+            # pipeline.hset(
+            #     f"stock:{product_id}", 
+            #     mapping={ "quantity": quantity }
+            # )
         
         pipeline.execute()
         print(f"{len(stocks)} enregistrements de stock ont été synchronisés avec Redis")
@@ -124,3 +149,18 @@ def _populate_redis_from_mysql(redis_conn):
         raise e
     finally:
         session.close()
+        
+        
+def _get_product_info(product_id, session):
+    """ Helper function to retreive product info from MySQL"""
+    result = session.execute(
+        text("""
+            SELECT name, sku, price 
+            FROM products 
+            WHERE id = :pid
+        """),
+        {"pid": product_id}
+    ).fetchone()
+    if result:
+        return {"name": result[0], "sku": result[1], "price": result[2]}
+    return {}

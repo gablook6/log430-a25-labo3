@@ -54,26 +54,26 @@
 					"response": []
 				},
 				{
-					"name": "/stocks/reports/overview Copy",
+					"name": "/stocks/reports/overview-stocks",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}/stocks/reports/overview",
+							"raw": "{{baseURL}}/stocks/reports/overview-stocks",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"stocks",
 								"reports",
-								"overview"
+								"overview-stocks"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "/stocks/graphql",
+					"name": "/stocks/graphql-query",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -85,13 +85,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseURL}}/stocks/graphql",
+							"raw": "{{baseURL}}/stocks/graphql-query",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"stocks",
-								"graphql"
+								"graphql-query"
 							]
 						}
 					},
@@ -288,17 +288,17 @@
 			"name": "Observability",
 			"item": [
 				{
-					"name": "/health",
+					"name": "/health-check",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}/health",
+							"raw": "{{baseURL}}/health-check",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
-								"health"
+								"health-check"
 							]
 						}
 					},

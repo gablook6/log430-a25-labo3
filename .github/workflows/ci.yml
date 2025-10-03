@@ -9,11 +9,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
       - uses: actions/checkout@v4
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -30,6 +33,29 @@ jobs:
           echo "REDIS_PORT=6379" >> .env
           echo "REDIS_DB=0" >> .env
 
+      - name: Demarer les containers
+        run: |
+          docker compose up -d
+
+      - name: Attendre que MySQL soit prêt
+        run: |
+          for i in {1..5}; do
+            if mysqladmin ping -h localhost -ulabo02 -plabo02 --silent; then
+              break
+            fi
+            sleep 5
+          done 
+
       - name: Run tests
         working-directory: src
-        run: echo "Call pytest command here!"
+        run: python -m pytest
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}     
+          username: ${{ secrets.SERVER_USER }}  
+          key: ${{ secrets.SERVER_SSH_KEY }}     
+          script: |
+            cd ~/ETS/LOG430/LAB3
+            ./deploy.sh
