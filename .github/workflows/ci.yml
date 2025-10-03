@@ -24,14 +24,17 @@ jobs:
 
       - name: Creer fichier .env
         run: |
-          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_HOST=localhost" >> .env
           echo "DB_PORT=3306" >> .env
           echo "DB_NAME=labo03_db" >> .env
           echo "DB_USER=labo03" >> .env
           echo "DB_PASS=labo03" >> .env
-          echo "REDIS_HOST=127.0.0.1" >> .env
+          echo "REDIS_HOST=localhost" >> .env
           echo "REDIS_PORT=6379" >> .env
           echo "REDIS_DB=0" >> .env
+
+      - name: Creer labo03-network
+        run: docker network create labo03-network
 
       - name: Demarer les containers
         run: |
